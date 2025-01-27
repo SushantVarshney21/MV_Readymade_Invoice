@@ -13,18 +13,21 @@ app.use(express.json());
 
 // Configure CORS to allow only the specific origin
 const corsOptions = {
-  origin: '*', // Allow only this origin
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed HTTP methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
+  origin: "*", // Frontend URL
+  credentials: true, // Allow cookies and headers for authentication
 };
 
-app.use(cors(corsOptions)); // Use the configured CORS
+app.use(cors(corsOptions));
 
 // Connect to Database
 connectDB();
 
 // Routes
 app.use('/invoices', invoiceRoutes);
+
+app.get('/', (req,res)=>{
+  res.send('Invoice API is running');
+})
 
 const PORT = process.env.PORT || 5000;
 
