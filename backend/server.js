@@ -13,9 +13,12 @@ app.use(express.json());
 
 // Configure CORS to allow only the specific origin
 const corsOptions = {
-  origin: "*", // Frontend URL
+  origin: 'https://mv-readymade-invoicefrontend.vercel.app', // Replace with your frontend URL
   credentials: true, // Allow cookies and headers for authentication
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
 };
+
 
 app.use(cors(corsOptions));
 
