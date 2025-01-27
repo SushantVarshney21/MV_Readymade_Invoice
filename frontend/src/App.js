@@ -13,7 +13,7 @@ function App() {
 
   useEffect(() => {
     // Fetch invoice count to set invoice number
-    axios.get('http://localhost:5000/invoices').then((response) => {
+    axios.get(`${process.env.REACT_APP_BASE_URL}/invoices`).then((response) => {
       setInvoiceNumber(response.data.length + 1);
     });
 
@@ -65,7 +65,7 @@ function App() {
       totalAmount,
     };
 
-    axios.post('http://localhost:5000/invoices/create', invoice)
+    axios.post(`${process.env.REACT_APP_BASE_URL}/invoices/create`, invoice)
       .then(() => {
         alert('Invoice Saved Successfully');
         window.print(); // Print the invoice
