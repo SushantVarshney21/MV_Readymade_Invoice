@@ -10,7 +10,15 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors()); // Enable CORS for all routes
+
+// Configure CORS to allow only the specific origin
+const corsOptions = {
+  origin: 'https://mv-readymade-invoicefrontend.vercel.app', // Allow only this origin
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
+};
+
+app.use(cors(corsOptions)); // Use the configured CORS
 
 // Connect to Database
 connectDB();
