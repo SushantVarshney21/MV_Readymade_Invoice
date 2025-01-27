@@ -13,7 +13,7 @@ app.use(express.json());
 
 // Configure CORS to allow only the specific origin
 const corsOptions = {
-  origin: 'https://mv-readymade-invoicefrontend.vercel.app', // Allow only this origin
+  origin: '*', // Allow only this origin
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed HTTP methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
 };
