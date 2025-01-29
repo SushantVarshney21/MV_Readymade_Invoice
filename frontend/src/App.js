@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 function App() {
@@ -8,8 +8,12 @@ function App() {
   const [invoiceNumber, setInvoiceNumber] = useState(1);
   const [customerName, setCustomerName] = useState('');
   const [customerMobile, setCustomerMobile] = useState('');
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState([{ srNo: 1, itemQuantity: '', itemPrice: '', itemTotalPrice: 0 }]); // Automatically generate first row
   const [totalAmount, setTotalAmount] = useState(0);
+
+  const quantityRefs = useRef([]);
+  const priceRefs = useRef([]);
+  const focusIndex = useRef(0); // To keep track of the current row for focus control
 
   useEffect(() => {
     // Fetch invoice count to set invoice number
@@ -17,11 +21,11 @@ function App() {
       setInvoiceNumber(response.data.length + 1);
     });
 
-    // Add keyboard event listener for adding rows on Enter
+    // Add keyboard event listener for adding rows and focusing
     const handleKeyPress = (e) => {
       if (e.key === 'Enter') {
         e.preventDefault(); // Prevent default form submission
-        handleAddRow();
+        handleFocusAndAddRow();
       }
     };
     window.addEventListener('keypress', handleKeyPress);
@@ -30,15 +34,33 @@ function App() {
     };
   }, [items]);
 
-  const handleAddRow = () => {
-    setItems([...items, { srNo: items.length + 1, itemName: '', itemQuantity: null, itemPrice: null, itemTotalPrice: 0 }]);
+  const handleFocusAndAddRow = () => {
+    const currentRow = items[focusIndex.current];
+
+    if (currentRow && currentRow.itemQuantity && !currentRow.itemPrice) {
+      // If Item Quantity is filled, shift focus to Item Price
+      priceRefs.current[focusIndex.current]?.focus();
+    } else if (currentRow && currentRow.itemPrice) {
+      // If Item Price is filled, add a new row and focus on Item Quantity of the new row
+      setItems((prevItems) => {
+        const newRow = { srNo: prevItems.length + 1, itemQuantity: '', itemPrice: '', itemTotalPrice: 0 };
+        const updatedItems = [...prevItems, newRow];
+        setTotalAmount(updatedItems.reduce((sum, item) => sum + item.itemTotalPrice, 0));
+        return updatedItems;
+      });
+
+      // Move focus to the Item Quantity input of the newly added row
+      focusIndex.current = items.length; // Move focus index to the next row
+      setTimeout(() => {
+        quantityRefs.current[focusIndex.current]?.focus();
+      }, 100);
+    }
   };
 
   const handleDeleteRow = (index) => {
-    const updatedItems = items.filter((_, i) => i !== index); // Remove the row
-    const updatedTotalAmount = updatedItems.reduce((sum, item) => sum + item.itemTotalPrice, 0); // Recalculate total amount
+    const updatedItems = items.filter((_, i) => i !== index);
     setItems(updatedItems.map((item, i) => ({ ...item, srNo: i + 1 }))); // Reassign Sr No
-    setTotalAmount(updatedTotalAmount); // Update the total amount
+    setTotalAmount(updatedItems.reduce((sum, item) => sum + item.itemTotalPrice, 0));
   };
 
   const handleItemChange = (index, key, value) => {
@@ -73,10 +95,8 @@ function App() {
         // Reset form fields
         setCustomerName('');
         setCustomerMobile('');
-        setItems([]);
+        setItems([{ srNo: 1, itemQuantity: '', itemPrice: '', itemTotalPrice: 0 }]); // Reset to first row
         setTotalAmount(0);
-
-        window.location.reload();
       })
       .catch(() => {
         alert('Error saving invoice');
@@ -87,6 +107,9 @@ function App() {
     const value = e.target.value.replace(/\D/g, ''); // Allow only numbers
     setCustomerMobile(value.slice(0, 10)); // Limit to 10 digits
   };
+
+  // Calculate total item quantity
+  const totalItemQuantity = items.reduce((sum, item) => sum + (Number(item.itemQuantity) || 0), 0);
 
   return (
     <div className="app">
@@ -170,49 +193,53 @@ function App() {
             font-weight: bold;
             font-size: 16px;
           }
-
-          /* Print-specific styles */
-          @media print {
-            body {
-              font-size: 12px;
-            }
-            .app {
-              max-width: 100%;
-              padding: 0;
-            }
-            input{
-            border:none;
-            }
-            button {
-              display: none; /* Hide action buttons on print */
-            }
-            table,
-            th,
-            td {
-              border: 1px solid #000;
-              padding: 8px;
-            }
-            td input {
-              border: none; /* Remove input border when printing */
-              width: 100%; /* Ensure input fields fill the cell */
-            }
-            .total-amount {
-              display: block !important; /* Ensure total amount is visible on print */
-              margin-top: 20px;
-            }
-            /* Hide the Actions column during print */
-            th:nth-child(6),
-            td:nth-child(6) {
-              display: none;
-            }
-            .cus-det{
-              width:100%;
-              display: flex;
-              align-items:center;
-              justify-content: space-between;
-              margin:12px;
-            }
+          .total-quantity {
+            font-weight: bold;
+            font-size: 16px;
+            margin-right: 20px;
           }
+
+          @media print {
+  body {
+    font-size: 12px;
+  }
+  .app {
+    max-width: 100%;
+    padding: 0;
+  }
+  input{
+    border:none;
+  }
+  button {
+    display: none; /* Hide action buttons on print */
+  }
+  table,
+  th,
+  td {
+    border: 1px solid #000;
+    padding: 8px;
+  }
+  td input {
+    border: none; /* Remove input border when printing */
+    width: 100%; /* Ensure input fields fill the cell */
+  }
+  .total-amount {
+    display: block !important; /* Ensure total amount is visible on print */
+    margin-top: 20px;
+  }
+  /* Hide the Actions column during print */
+  th:nth-child(5),
+  td:nth-child(5) {
+    display: none;
+  }
+  .cus-det{
+    width:100%;
+    display: flex;
+    align-items:center;
+    justify-content: space-between;
+    margin:12px;
+  }
+}
         `}
       </style>
 
@@ -224,25 +251,25 @@ function App() {
         <div>Invoice No: {invoiceNumber}</div>
       </div>
       <div className='cus-det'>
-      <div>
-        <label>Customer Name</label>
-        <input placeholder="Enter Customer Name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
+        <div>
+          <label>Customer Name</label>
+          <input placeholder="Enter Customer Name" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
+        </div>
+        <div>
+          <label>Phone Number</label>
+          <input
+            placeholder="Enter Customer Mobile"
+            value={customerMobile}
+            onInput={handleMobileInput}
+            maxLength="10"
+          />
+        </div>
       </div>
-      <div>
-        <label>Phone Number</label>
-        <input
-          placeholder="Enter Customer Mobile"
-          value={customerMobile}
-          onInput={handleMobileInput}
-          maxLength="10"
-        />
-      </div>
-      </div>
+
       <table>
         <thead>
           <tr>
             <th>Sr No</th>
-            <th>Item Name</th>
             <th>Item Quantity</th>
             <th>Item Price</th>
             <th>Item Total Price</th>
@@ -253,20 +280,36 @@ function App() {
           {items.map((item, index) => (
             <tr key={index}>
               <td>{item.srNo}</td>
-              <td><input value={item.itemName} onChange={(e) => handleItemChange(index, 'itemName', e.target.value)} /></td>
-              <td><input type="number" value={item.itemQuantity} onChange={(e) => handleItemChange(index, 'itemQuantity', Number(e.target.value))} /></td>
-              <td><input type="number" value={item.itemPrice} onChange={(e) => handleItemChange(index, 'itemPrice', Number(e.target.value))} /></td>
+              <td>
+                <input
+                  ref={(el) => quantityRefs.current[index] = el}
+                  type="number"
+                  value={item.itemQuantity}
+                  onChange={(e) => handleItemChange(index, 'itemQuantity', Number(e.target.value))}
+                />
+              </td>
+              <td>
+                <input
+                  ref={(el) => priceRefs.current[index] = el}
+                  type="number"
+                  value={item.itemPrice}
+                  onChange={(e) => handleItemChange(index, 'itemPrice', Number(e.target.value))}
+                />
+              </td>
               <td>{item.itemTotalPrice}</td>
               <td><button onClick={() => handleDeleteRow(index)}>Delete</button></td>
             </tr>
           ))}
         </tbody>
       </table>
-      <div className="actions">
+
+      <div className="actions" style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+        <div className="total-quantity">Total Item Quantity: {totalItemQuantity}</div>
         <div className="total-amount">Total Amount: {totalAmount}</div>
       </div>
+
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <button style={{ textAlign: 'center' }} onClick={handleSaveAndPrintInvoice}>Print & Save Invoice</button>
+        <button onClick={handleSaveAndPrintInvoice}>Print & Save Invoice</button>
       </div>
     </div>
   );

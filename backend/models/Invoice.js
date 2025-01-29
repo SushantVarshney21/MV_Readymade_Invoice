@@ -10,7 +10,6 @@ const InvoiceSchema = new mongoose.Schema({
   items: [
     {
       srNo: Number,
-      itemName: String,
       itemQuantity: Number,
       itemPrice: Number,
       itemTotalPrice: Number,
