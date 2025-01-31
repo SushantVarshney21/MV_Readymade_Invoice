@@ -20,42 +20,50 @@ function App() {
     axios.get(`${process.env.REACT_APP_BASE_URL}/invoices`).then((response) => {
       setInvoiceNumber(response.data.length + 1);
     });
+  }, [items]);
 
-    // Add keyboard event listener for adding rows and focusing
+  useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.key === 'Enter') {
         e.preventDefault(); // Prevent default form submission
         handleFocusAndAddRow();
       }
     };
-    window.addEventListener('keypress', handleKeyPress);
+  
+    window.addEventListener('keydown', handleKeyPress); // 'keydown' use karein taaki better response mile
+  
     return () => {
-      window.removeEventListener('keypress', handleKeyPress);
+      window.removeEventListener('keydown', handleKeyPress);
     };
-  }, [items]);
-
+  }, []); // Empty dependency array se ek baar hi register hoga
+  
   const handleFocusAndAddRow = () => {
-    const currentRow = items[focusIndex.current];
-
-    if (currentRow && currentRow.itemQuantity && !currentRow.itemPrice) {
-      // If Item Quantity is filled, shift focus to Item Price
-      priceRefs.current[focusIndex.current]?.focus();
-    } else if (currentRow && currentRow.itemPrice) {
-      // If Item Price is filled, add a new row and focus on Item Quantity of the new row
-      setItems((prevItems) => {
+    setItems((prevItems) => {
+      const lastItem = prevItems[prevItems.length - 1];
+  
+      if (lastItem.itemQuantity && !lastItem.itemPrice) {
+        // Agar Quantity bhar diya hai par Price khali hai to Price input pe focus karein
+        setTimeout(() => {
+          priceRefs.current[prevItems.length - 1]?.focus();
+        }, 100);
+        return prevItems;
+      } else if (lastItem.itemQuantity && lastItem.itemPrice) {
+        // Dono fields filled hone par naye row add karein aur naye row ke Quantity pe focus karein
         const newRow = { srNo: prevItems.length + 1, itemQuantity: '', itemPrice: '', itemTotalPrice: 0 };
         const updatedItems = [...prevItems, newRow];
-        setTotalAmount(updatedItems.reduce((sum, item) => sum + item.itemTotalPrice, 0));
+  
+        setTimeout(() => {
+          focusIndex.current = updatedItems.length - 1; // Focus index ko update karein
+          quantityRefs.current[focusIndex.current]?.focus();
+        }, 100);
+  
         return updatedItems;
-      });
-
-      // Move focus to the Item Quantity input of the newly added row
-      focusIndex.current = items.length; // Move focus index to the next row
-      setTimeout(() => {
-        quantityRefs.current[focusIndex.current]?.focus();
-      }, 100);
-    }
+      }
+  
+      return prevItems;
+    });
   };
+  
 
   const handleDeleteRow = (index) => {
     const updatedItems = items.filter((_, i) => i !== index);
@@ -86,22 +94,24 @@ function App() {
       items,
       totalAmount,
     };
-
+  
     axios.post(`${process.env.REACT_APP_BASE_URL}/invoices/create`, invoice)
       .then(() => {
         alert('Invoice Saved Successfully');
         window.print(); // Print the invoice
-
+  
         // Reset form fields
         setCustomerName('');
         setCustomerMobile('');
         setItems([{ srNo: 1, itemQuantity: '', itemPrice: '', itemTotalPrice: 0 }]); // Reset to first row
         setTotalAmount(0);
+        focusIndex.current = 0; // Reset focus index
       })
       .catch(() => {
         alert('Error saving invoice');
       });
   };
+  
 
   const handleMobileInput = (e) => {
     const value = e.target.value.replace(/\D/g, ''); // Allow only numbers
@@ -121,7 +131,7 @@ function App() {
             padding: 20px;
             font-family: Arial, sans-serif;
           }
-          h1 {
+          h3 {
             text-align: center;
           }
           .organization {
@@ -212,7 +222,7 @@ function App() {
           @media print {
           @page {
     size: A5 portrait; /* Adjust as needed */
-    margin: 0; /* Remove default margins */
+    margin: 0 6px; /* Remove default margins */
   }
   body {
     margin: 0;
@@ -262,7 +272,7 @@ function App() {
         `}
       </style>
 
-      <h1>Invoice</h1>
+      <h3>Invoice</h3>
       <div className="organization">{organizationName}</div>
       <div className="estimate">ESTIMATE</div>
       <div className="details-line">
