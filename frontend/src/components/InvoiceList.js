@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { Link } from 'react-router-dom';
 
 const InvoiceList = () => {
   const [invoices, setInvoices] = useState([]);
@@ -59,6 +60,9 @@ const InvoiceList = () => {
 
   return (
     <div className="invoice-container">
+      <div style={{position:'fixed' , top:'20px', left:'10px' }}>
+        <Link to='/' className="back">🔙</Link>
+      </div>
       <h2>Invoices</h2>
       <input
         type="text"
@@ -250,6 +254,17 @@ const InvoiceList = () => {
           margin-top: 10px;
           text-align: right;
         }
+          .back{
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 50px 0px;
+            text-decoration: none;
+            font-size: 30px;
+          }
         `}
       </style>
     </div>
