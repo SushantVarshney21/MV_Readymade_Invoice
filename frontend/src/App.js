@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 function App() {
-  const [organizationName] = useState('MV Readymade Atrauli (Aligarh)');
+  const [organizationName] = useState('JAI MATA DI');
   const [date] = useState(new Date().toLocaleDateString('en-GB')); // DD/MM/YYYY
-  const [time] = useState(new Date().toLocaleTimeString('en-US', { hour12: true })); // 12-hour format
+  const [time, setTime] = useState(new Date().toLocaleTimeString('en-US', { hour12: true })); // 12-hour format
   const [invoiceNumber, setInvoiceNumber] = useState(1);
   const [customerName, setCustomerName] = useState('');
   const [customerMobile, setCustomerMobile] = useState('');
@@ -90,6 +90,7 @@ function App() {
     axios.post(`${process.env.REACT_APP_BASE_URL}/invoices/create`, invoice)
       .then(() => {
         alert('Invoice Saved Successfully');
+        setTime(new Date().toLocaleTimeString('en-US', { hour12: true }))
         window.print(); // Print the invoice
 
         // Reset form fields
@@ -128,7 +129,17 @@ function App() {
             text-align: center;
             font-size: 18px;
             font-weight: bold;
-            margin: 30px 0;
+            margin: 0px 0;
+            margin-bottom: 10px;
+            text-decoration: underline;
+          }
+          .estimate {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 15px 0;
+            margin-top: 0px;
+            text-decoration: underline;
           }
           .details-line {
             display: flex;
@@ -200,6 +211,9 @@ function App() {
           }
 
           @media print {
+           @page {
+    size: A5 portrait; /* Change to landscape if needed */
+  }
   body {
     font-size: 12px;
   }
@@ -217,11 +231,14 @@ function App() {
   th,
   td {
     border: 1px solid #000;
-    padding: 8px;
+    padding: 2px;
+    margin:0;
   }
   td input {
     border: none; /* Remove input border when printing */
     width: 100%; /* Ensure input fields fill the cell */
+    padding: 2px;
+    margin:0;
   }
   .total-amount {
     display: block !important; /* Ensure total amount is visible on print */
@@ -245,6 +262,7 @@ function App() {
 
       <h1>Invoice</h1>
       <div className="organization">{organizationName}</div>
+      <div className="estimate">ESTIMATE</div>
       <div className="details-line">
         <div>Date: {date}</div>
         <div>Time: {time}</div>
