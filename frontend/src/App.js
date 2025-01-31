@@ -4,7 +4,7 @@ import axios from 'axios';
 function App() {
   const [organizationName] = useState('JAI MATA DI');
   const [date] = useState(new Date().toLocaleDateString('en-GB')); // DD/MM/YYYY
-  const [time, setTime] = useState(new Date().toLocaleTimeString('en-US', { hour12: true })); // 12-hour format
+  const [time] = useState(new Date().toLocaleTimeString('en-US', { hour12: true })); // 12-hour format
   const [invoiceNumber, setInvoiceNumber] = useState(1);
   const [customerName, setCustomerName] = useState('');
   const [customerMobile, setCustomerMobile] = useState('');
@@ -90,7 +90,6 @@ function App() {
     axios.post(`${process.env.REACT_APP_BASE_URL}/invoices/create`, invoice)
       .then(() => {
         alert('Invoice Saved Successfully');
-        setTime(new Date().toLocaleTimeString('en-US', { hour12: true }))
         window.print(); // Print the invoice
 
         // Reset form fields
@@ -211,15 +210,18 @@ function App() {
           }
 
           @media print {
-           @page {
-    size: A5 portrait; /* Change to landscape if needed */
+          @page {
+    size: A5 portrait; /* Adjust as needed */
+    margin: 0; /* Remove default margins */
   }
   body {
-    font-size: 12px;
+    margin: 0;
+    padding: 0;
   }
   .app {
     max-width: 100%;
     padding: 0;
+    margin: 0;
   }
   input{
     border:none;
