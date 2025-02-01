@@ -279,6 +279,9 @@ function CreateInvoice() {
     justify-content: space-between;
     margin:12px;
   }
+  a{
+  display:none;
+  }
 }
         `}
       </style>

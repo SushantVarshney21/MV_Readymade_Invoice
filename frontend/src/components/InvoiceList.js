@@ -26,13 +26,12 @@ const InvoiceList = () => {
     doc.text(`Date: ${invoice.date}  Time: ${invoice.time}`, 14, 25);
     doc.text(`Customer: ${invoice.customerName} (${invoice.customerMobile})`, 14, 35);
 
-    const tableColumn = ["Sr No.", "Item", "Quantity", "Price", "Total"];
+    const tableColumn = ["Sr No.","Quantity", "Price", "Total"];
     const tableRows = invoice.items.map((item, index) => [
       index + 1,
-      item.itemName,
       item.itemQuantity,
-      `₹${item.itemPrice}`,
-      `₹${item.itemTotalPrice}`,
+      item.itemPrice,
+      item.itemTotalPrice,
     ]);
 
     doc.autoTable({
@@ -44,7 +43,7 @@ const InvoiceList = () => {
       headStyles: { fillColor: [40, 40, 40] },
     });
 
-    doc.text(`Total Amount: ₹${invoice.totalAmount}`, 14, doc.autoTable.previous.finalY + 10);
+    doc.text(`Total Amount: ${invoice.totalAmount}`, 14, doc.autoTable.previous.finalY + 10);
     doc.save(`Invoice_${invoice.invoiceNumber}.pdf`);
   };
 
@@ -118,7 +117,6 @@ const InvoiceList = () => {
                 <thead>
                   <tr>
                     <th>Sr No.</th>
-                    <th>Item</th>
                     <th>Quantity</th>
                     <th>Price</th>
                     <th>Total</th>
@@ -128,7 +126,6 @@ const InvoiceList = () => {
                   {selectedInvoice.items.map((item, index) => (
                     <tr key={index}>
                       <td>{index + 1}</td>
-                      <td>{item.itemName}</td>
                       <td>{item.itemQuantity}</td>
                       <td>₹{item.itemPrice}</td>
                       <td>₹{item.itemTotalPrice}</td>
