@@ -11,6 +11,7 @@ function CreateInvoice() {
   const [customerMobile, setCustomerMobile] = useState('');
   const [items, setItems] = useState([{ srNo: 1, itemQuantity: '', itemPrice: '', itemTotalPrice: 0 }]); // Automatically generate first row
   const [totalAmount, setTotalAmount] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const quantityRefs = useRef([]);
   const priceRefs = useRef([]);
@@ -85,6 +86,7 @@ function CreateInvoice() {
   };
 
   const handleSaveAndPrintInvoice = () => {
+    setLoading(true)
     const invoice = {
       organizationName,
       date,
@@ -107,6 +109,7 @@ function CreateInvoice() {
         setItems([{ srNo: 1, itemQuantity: '', itemPrice: '', itemTotalPrice: 0 }]); // Reset to first row
         setTotalAmount(0);
         focusIndex.current = 0; // Reset focus index
+        setLoading(false)
       })
       .catch(() => {
         alert('Error saving invoice');
@@ -359,7 +362,7 @@ function CreateInvoice() {
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <button onClick={handleSaveAndPrintInvoice}>Print & Save Invoice</button>
+      <button onClick={handleSaveAndPrintInvoice}>{loading ? 'Loading...' : 'Print & Save Invoice'}</button>
       </div>
 
      
