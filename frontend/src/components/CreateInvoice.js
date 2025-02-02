@@ -236,7 +236,7 @@ function CreateInvoice() {
           @media print {
           @page {
     size: A5 portrait; /* Adjust as needed */
-    margin: 0 6px; /* Remove default margins */
+    margin:20px 40px; /* Remove default margins */
   }
   body {
     margin: 0;

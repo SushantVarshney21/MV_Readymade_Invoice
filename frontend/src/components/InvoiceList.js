@@ -22,30 +22,45 @@ const InvoiceList = () => {
 
   const handleDownloadPDF = (invoice) => {
     const doc = new jsPDF();
+    
+    // Invoice Header
     doc.text(`Invoice No: ${invoice.invoiceNumber}`, 14, 15);
     doc.text(`Date: ${invoice.date}  Time: ${invoice.time}`, 14, 25);
     doc.text(`Customer: ${invoice.customerName} (${invoice.customerMobile})`, 14, 35);
 
-    const tableColumn = ["Sr No.","Quantity", "Price", "Total"];
+    // Table Header
+    const tableColumn = ["Sr No.", "Quantity", "Price", "Total"];
     const tableRows = invoice.items.map((item, index) => [
-      index + 1,
-      item.itemQuantity,
-      item.itemPrice,
-      item.itemTotalPrice,
+        index + 1,
+        item.itemQuantity,
+        item.itemPrice,
+        item.itemTotalPrice,
     ]);
 
+    // Calculate Total Quantity
+    const totalQuantity = invoice.items.reduce((sum, item) => sum + item.itemQuantity, 0);
+
+    // Generate Table
     doc.autoTable({
-      startY: 45,
-      head: [tableColumn],
-      body: tableRows,
-      theme: "striped",
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [40, 40, 40] },
+        startY: 45,
+        head: [tableColumn],
+        body: tableRows,
+        theme: "striped",
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [40, 40, 40] },
     });
 
-    doc.text(`Total Amount: ${invoice.totalAmount}`, 14, doc.autoTable.previous.finalY + 10);
+    // Position for totals
+    const finalY = doc.autoTable.previous.finalY + 10;
+    
+    // Add Totals
+    doc.text(`Total Quantity: ${totalQuantity}`, 14, finalY);
+    doc.text(`Total Amount: ${invoice.totalAmount}`, 14, finalY + 10);
+
+    // Save PDF
     doc.save(`Invoice_${invoice.invoiceNumber}.pdf`);
-  };
+};
+
 
   const handleViewInvoice = (invoice) => {
     setSelectedInvoice(invoice);
